@@ -1,0 +1,6 @@
+__pycache__
+*pyc
+.vscode
+venv
+tests/test_async_query.py
+docs/build

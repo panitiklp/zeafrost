@@ -1,0 +1,81 @@
+import unittest
+import os
+import sys
+
+from pprint import pprint
+
+MODULE = os.path.dirname(os.path.dirname(__file__))
+if not MODULE in sys.path:
+    sys.path.append(MODULE)
+
+from src import main_ctl
+
+class TestCache(unittest.TestCase):
+    
+    def test_cache_project(self):
+        pyload = {}
+        entity = 'project'
+        
+        result = main_ctl.cache(
+            entity=entity.lower(),
+            body=pyload)
+
+        self.assertNotEqual(result['data'], [])
+
+    def test_cache_episode(self):
+        pyload = {'project': 'pnty'}
+        entity = 'episode'
+        
+        result = main_ctl.cache(
+            entity=entity.lower(),
+            body=pyload)
+
+        self.assertNotEqual(result['data'], [])
+
+    def test_cache_sequence(self):
+        pyload = {'project': 'pnty'}
+        entity = 'sequence'
+        
+        result = main_ctl.cache(
+            entity=entity.lower(),
+            body=pyload)
+
+        self.assertNotEqual(result['data'], [])
+
+    def test_cache_shot(self):
+        pyload = {'project': 'pnty'}
+        entity = 'shot'
+        
+        result = main_ctl.cache(
+            entity=entity.lower(),
+            body=pyload)
+
+        self.assertNotEqual(result['data'], [])
+
+    def test_cache_asset(self):
+        pyload = {'project': 'pnty'}
+        entity = 'asset'
+        
+        result = main_ctl.cache(
+            entity=entity.lower(),
+            body=pyload)
+
+        self.assertNotEqual(result['data'], [])
+
+    def test_cache_publishedfiletype(self):
+        pass
+
+    def test_cache_user(self):
+        pass
+
+    def test_cache_step(self):
+        pass
+
+    def test_cache_status(self):
+        pass
+
+        
+
+
+if __name__ == '__main__':
+    unittest.main()

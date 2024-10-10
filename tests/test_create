@@ -1,0 +1,484 @@
+import unittest
+import os
+import sys
+
+from pprint import pprint
+
+MODULE = os.path.dirname(os.path.dirname(__file__))
+if not MODULE in sys.path:
+    sys.path.append(MODULE)
+
+from src import main_ctl
+
+class TestCreateProject(unittest.TestCase):
+
+    # /////////////// #
+    #     project     #
+    # /////////////// #
+
+    def test_create_project(self):
+        payload = {
+            "code": "zeafrost",
+            "name": "zeafrost_test_api",
+            "type": "rnd",
+            "frame_rate": 24,
+            "resolution": "",
+            "project_path": "T:/rnd/zeafrost",
+            "directory": True  }
+        entity = 'project'
+
+        result = main_ctl.create(
+            entity=entity.lower(),
+            body=payload
+        )
+
+        # check search
+        #--------------
+        res_proj = main_ctl.search(
+            entity=entity.lower(),
+            body={'project': 'zeafrost'}
+        )
+
+        if not res_proj.get('data'):
+            raise ValueError(f'Project not create: {res_proj["message"]}')
+
+        else:
+            if not os.path.exists(payload.get('project_path')):
+                raise ValueError('not exists project in folder')
+
+
+
+class TestCreateEpisode(unittest.TestCase):
+
+    # /////////////// #
+    #     episode     #
+    # /////////////// #
+
+    def test_create_episode(self):
+        payload = {
+            "data": [
+                        {   
+                            "project": "zeafrost",
+                            "episode": "101"
+                        }
+                    ], 
+            "directory": True
+            }
+        entity = 'episode'
+
+        result = main_ctl.create(
+            entity=entity.lower(),
+            body=payload
+        )
+
+        # check search
+        #--------------
+        res_ep = main_ctl.search(
+            entity=entity.lower(),
+            body={'project': 'zeafrost', 'episode': '101'}
+        )
+
+        if not res_ep.get('data'):
+            raise ValueError(f'Episode not create: {res_ep["message"]}')
+
+    def test_create_episode_wrong(self):
+        payload = {
+            "data": [
+                        {   
+                            "project": "zeafrostttttttt",
+                            "episode": "102"
+                        }
+                    ], 
+            "directory": True
+            }
+        entity = 'episode'
+
+        result = main_ctl.create(
+            entity=entity.lower(),
+            body=payload
+        )
+
+        self.assertEqual(result['data'], [])
+
+
+
+class TestCreateSequence(unittest.TestCase):
+
+    # /////////////// #
+    #     sequence    #
+    # /////////////// #
+
+    def test_create_sequence(self):
+        payload = {
+            "data": [
+                        {
+                            "project": "zeafrost",
+                            "episode": "101", 
+                            "sequence": "S01"
+                        }
+                ], 
+            "directory": True
+        }
+        entity = 'sequence'
+
+        result = main_ctl.create(
+            entity=entity.lower(),
+            body=payload
+        )
+
+        # check search
+        #--------------
+        res_seq = main_ctl.search(
+            entity=entity.lower(),
+            body={'project': 'zeafrost', 'episode': '101', 'sequence': 'S01'}
+        )
+
+        if not res_seq.get('data'):
+            raise ValueError(f'Sequence not create: {res_seq["message"]}')
+
+    def test_create_sequence_wrong(self):
+        payload = {
+                "data": [
+                            {
+                                "project": "zeafrost", 
+                                "episode": "102", 
+                                "sequence": "S01"
+                            }
+                    ], 
+                "directory": True
+            }
+        entity = 'sequence'
+
+        result = main_ctl.create(
+            entity=entity.lower(),
+            body=payload
+        )
+
+        if not isinstance(result['data'], dict):
+            raise ValueError('Sequence not exists Episode error')
+
+
+
+class TestCreateShot(unittest.TestCase):
+
+    # /////////////// #
+    #      shot       #
+    # /////////////// #
+
+    def test_create_shot(self):
+        payload = {
+                "data": [
+                            {
+                                "project": "zeafrost", 
+                                "episode": "101", 
+                                "sequence": "S01", 
+                                "shot": "0010"
+                            }
+                    ], 
+                "directory": True
+            }
+        entity = 'shot'
+
+        result = main_ctl.create(
+            entity=entity.lower(),
+            body=payload
+        )
+
+        # check search
+        #--------------
+        res_shot = main_ctl.search(
+            entity=entity.lower(),
+            body={'project': 'zeafrost', 'episode': '101', 'sequence': 'S01', 'shot': '0010'}
+        )
+
+        if not res_shot.get('data'):
+            raise ValueError(f'Shot not create: {res_shot["message"]}')
+
+    def test_create_shot_wrong(self):
+        payload = {
+                "data": [
+                            {
+                                "project": "zeafrost", 
+                                "episode": "101", 
+                                "sequence": "S02", 
+                                "shot": "0020"
+                            }
+                    ], 
+                "directory": True
+            }
+        entity = 'shot'
+
+        result = main_ctl.create(
+            entity=entity.lower(),
+            body=payload
+        )
+
+        if not isinstance(result['data'], dict):
+            raise ValueError('Shot not exists Sequence error')
+
+
+
+class TestCreateAsset(unittest.TestCase):
+
+    # /////////////// #
+    #      asset      #
+    # /////////////// #
+
+    def test_create_asset(self):
+        payload = {
+                "data": [
+                            {
+                                "project": "zeafrost", 
+                                "type": "char", 
+                                "asset": "charBarr", 
+                                "variation": "default"
+                            }
+                    ], 
+                "directory": True
+            }
+        entity = 'asset'
+
+        result = main_ctl.create(
+            entity=entity.lower(),
+            body=payload
+        )
+
+        # check search
+        #--------------
+        res_asset = main_ctl.search(
+            entity=entity.lower(),
+            body={'project': 'zeafrost', 'type': 'char', 'asset': 'charBarr', 'variation': 'default'}
+        )
+
+        if not res_asset.get('data'):
+            raise ValueError(f'Asset not create: {res_asset["message"]}')
+
+
+    def test_create_asset_wrong(self):
+        payload = {
+                "data": [
+                            {
+                                "project": "zeafrost", 
+                                "type": "asss", 
+                                "asset": "charBarr", 
+                                "variation": "default"
+                            }
+                    ], 
+                "directory": True
+            }
+        entity = 'asset'
+
+        result = main_ctl.create(
+            entity=entity.lower(),
+            body=payload
+        )
+
+
+
+class TestCreateTask(unittest.TestCase):
+
+    # /////////////// #
+    #      task       #
+    # /////////////// #
+
+    def test_create_task_shot(self):
+        payload = {
+                "data": [
+                            {
+                                "project": "zeafrost",
+                                'episode': '101', 
+                                'sequence': 'S01', 
+                                'shot': '0010', 
+                                'step': 'lay', 
+                                'task': 'master'
+                            }
+                    ], 
+                "directory": True
+            }
+        entity = 'task'
+
+        result = main_ctl.create(
+            entity=entity.lower(),
+            body=payload
+        )
+
+    def test_create_task_asset(self):
+        payload = {
+                "data": [
+                            { 
+                                "project": "zeafrost",
+                                'asset': 'charBarr', 
+                                'variation': 'default', 
+                                'asset_type': 'char', 
+                                'step': 'rig', 
+                                'task': 'hi'
+                            }
+                    ], 
+                "directory": True
+            }
+        entity = 'task'
+
+        result = main_ctl.create(
+            entity=entity.lower(),
+            body=payload
+        )
+
+    def test_create_task_wrong(self):
+        payload = {
+            
+                "data": [
+                            {
+                                "project": "zeafrost",
+                                'episode': '104', 
+                                'sequence': 'S02', 
+                                'shot': '0020', 
+                                'step': 'lay', 
+                                'task': 'master'
+                            }
+                    ], 
+                "directory": True
+            }
+        entity = 'task'
+
+        result = main_ctl.create(
+            entity=entity.lower(),
+            body=payload
+        )
+
+        self.assertEqual(result['data'], [])
+
+
+
+class TestCreateVersion(unittest.TestCase):
+
+    # /////////////// #
+    #      task       #
+    # /////////////// #
+
+    def test_create_version_shot(self): # can not test local // error ssl [upload]
+        payload = {
+            "data": [
+                {
+                    "project":"zeafrost",
+                    "episode":"101",
+                    "sequence":"S01",
+                    "shot": "0010",
+                    "step":"lay",
+                    "task": "master",
+                    "name": "zeafrost_101_S01_0010_anm_blockning_v001",
+                    "submited_by":"thaksaporn",
+                    "description": "test api from zeafrost",
+                    "playlist": "20220503_lay",
+                    "note": "ทดสอบ",
+                    "path_to_movie": "T:/series/PNTY/review/shot/209/S02/0010/anm/PNTY_209_S02_0010_anm_blocking_v004.mov",
+                    "path_to_frames": "T:/series/PNTY/work/shot/201/S05/0060/cmp/nuke/output/PNTY_201_S05_0060_cmp_master_v008/PNTY_201_S05_0060_cmp_master_v008_aces2065-1.%04d.exr",
+                    "path_to_client": "T:/series/PNTY/review/shot/209/S02/0010/anm/PNTY_209_S02_0010_anm_blocking_v004.mov",
+                    "work_file": "T:/path/to/work/file.ma"
+                }
+            ]
+        }
+        entity = 'version'
+
+        # result = main_ctl.create(
+        #     entity=entity.lower(),
+        #     body=payload
+        # )
+
+    def test_create_version_asset(self): # can not test local // error ssl [upload]
+        payload = {
+            "data": [
+                {
+                    "project":"zeafrost",
+                    "asset_type":"char",
+                    "asset":"charBarr",
+                    "variation": "default",
+                    "step":"rig",
+                    "task": "hi",
+                    "name": "charBarr_default_rig_hi_v001",
+                    "submited_by":"thaksaporn",
+                    "description": "test api from zeafrost",
+                    "playlist": "20220504_rig",
+                    "note": "ทดสอบ asset",
+                    "path_to_movie": "T:/series/PNTY/review/shot/209/S02/0010/anm/PNTY_209_S02_0010_anm_blocking_v004.mov",
+                    "path_to_frames": "T:/series/PNTY/work/shot/201/S05/0060/cmp/nuke/output/PNTY_201_S05_0060_cmp_master_v008/PNTY_201_S05_0060_cmp_master_v008_aces2065-1.%04d.exr",
+                    "path_to_client": "T:/series/PNTY/review/shot/209/S02/0010/anm/PNTY_209_S02_0010_anm_blocking_v004.mov",
+                    "work_file": "T:/path/to/work/file.ma"
+                }
+            ]
+        }
+        entity = 'version'
+
+        # result = main_ctl.create(
+        #     entity=entity.lower(),
+        #     body=payload
+        # )
+
+    def test_create_version_wrong_task(self): # can not test local // error ssl [upload] // crete version not link task
+        payload = {
+            "data": [
+                {
+                    "project":"zeafrost",
+                    "episode":"101",
+                    "sequence":"S01",
+                    "shot": "0010",
+                    "step":"anm",
+                    "task": "blockning",
+                    "name": "zeafrost_101_S01_0010_anm_blockning_v001",
+                    "submited_by":"thaksaporn",
+                    "description": "test api from zeafrost",
+                    "playlist": "20220503_lay",
+                    "path_to_movie": "T:/series/PNTY/review/shot/209/S02/0010/anm/PNTY_209_S02_0010_anm_blocking_v004.mov",
+                    "path_to_client": "T:/series/PNTY/review/shot/209/S02/0010/anm/PNTY_209_S02_0010_anm_blocking_v004.mov",
+                    "work_file": "T:/path/to/work/file.ma"
+                }
+            ]
+        }
+        entity = 'version'
+
+        # result = main_ctl.create(
+        #     entity=entity.lower(),
+        #     body=payload
+        # )
+
+    def test_create_version_wrong_shot(self):
+        payload = {
+            "data": [
+                {
+                    "project":"zeafrost",
+                    "episode":"101",
+                    "sequence":"S0S",
+                    "shot": "0020",
+                    "step":"lay",
+                    "task": "master",
+                    "name": "zeafrost_101_S01_0010_anm_blockning_v001",
+                    "submited_by":"thaksaporn",
+                    "description": "test api from zeafrost",
+                    "playlist": "20220503_lay",
+                    "note": "ทดสอบ",
+                    "path_to_movie": "T:/series/PNTY/review/shot/209/S02/0010/anm/PNTY_209_S02_0010_anm_blocking_v004.mov",
+                    "path_to_frames": "T:/series/PNTY/work/shot/201/S05/0060/cmp/nuke/output/PNTY_201_S05_0060_cmp_master_v008/PNTY_201_S05_0060_cmp_master_v008_aces2065-1.%04d.exr",
+                    "path_to_client": "T:/series/PNTY/review/shot/209/S02/0010/anm/PNTY_209_S02_0010_anm_blocking_v004.mov",
+                    "work_file": "T:/path/to/work/file.ma"
+                }
+            ]
+        }
+        entity = 'version'
+
+        # result = main_ctl.create(
+        #     entity=entity.lower(),
+        #     body=payload
+        # )
+
+        # self.assertEqual(result['data'], [])
+
+
+
+
+
+
+
+
+if __name__ == '__main__':
+    unittest.main()
+    suite = unittest.TestLoader().loadTestsFromTestCase()
+    # results = unittest.TextTestRunner(verbosity=2).run(su)
