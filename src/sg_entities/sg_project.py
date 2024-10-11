@@ -48,18 +48,16 @@ def entity_cache(*args, **kwargs):
     redis_project_pattern = f'sg:project:*'.lower()
 
     project = kwargs.get('project') or ''
-
     # get data from SG
     #-----------------
     filters = [
             ['sg_status', 'is', 'Active'],
             ['archived', 'is', False]
         ]
-
     if project:
         filters.append(['name', 'is', project])
         redis_project_pattern = f'sg:project:{project}:*'.lower()
-    
+
     sg = sg_con.connect()
     sg_result = sg.find(
         'Project', 
