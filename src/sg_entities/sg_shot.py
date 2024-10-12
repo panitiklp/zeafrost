@@ -61,7 +61,6 @@ def entity_cache(*args, **kwargs):
     project = ''
     redis_pattern = ''
     sg_result = []
-
     if kwargs.get('project') == None:
         return []
 
@@ -89,7 +88,6 @@ def entity_cache(*args, **kwargs):
         _sg_project  = elem.get('project')
         _sg_episode  = elem.get('sg_episode.Episode.code')
         _sg_sequence = elem.get('sg_sequence.Sequence.code')
-        
         if _sg_project and _sg_episode and _sg_sequence:
             redis_name =  'sg:shot:'
             redis_name += f'{_sg_project.get("name")}:'

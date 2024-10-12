@@ -7,7 +7,13 @@ load_dotenv(os.path.join(basedir, '.env'))
 
 class ZeafrostDb(object):
     def __init__(self):
-        self.mongo_client = pymongo.MongoClient(f'mongodb://{os.environ.get("ZEAFROST_DB_HOST_IP")}:{os.environ.get("ZEAFROST_DB_PORT")}/')
+        self.mongo_client = pymongo.MongoClient(
+            f'mongodb://{os.environ.get("ZEAFROST_DB_HOST_IP")}:{os.environ.get("ZEAFROST_DB_PORT")}/',
+            username=os.environ.get("ZEAFROST_DB_USERNAME"),
+            password=os.environ.get("ZEAFROST_DB_PASSWORD"),
+            authSource=os.environ.get("ZEAFROST_DB_AUTH_SOURCE"),
+            authMechanism=os.environ.get("ZEAFROST_DB_AUTH_MECHANISM")
+        )
         
         self.db = self.mongo_client['zeafrost']
         self.collection = ''
