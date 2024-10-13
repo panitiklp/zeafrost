@@ -2,17 +2,14 @@ from collections import OrderedDict
 from . import sg_entity_utils
 from . import step_downstream
 from . import sg_task
-
 from .. import rocketchat
 from .. import intercon
 from ..redis_controllers import redis_ctl
 from ..sg_controllers import sg_con
 
-
 from pprint import pprint
 import copy
 import requests
-
 
 SG_FIELD_MAPS = {
     'id': 'id',
@@ -28,10 +25,10 @@ SG_FIELD_MAPS = {
     'department_name': 'department.Department.name',
     'position': 'sg_position',
     'status': 'sg_status_list',
-    'employee_id': 'sg_employee_id',
+    # 'employee_id': 'sg_employee_id',
     'employee_status': 'sg_emp_status',
     'login': 'login',
-    'domain_name': 'sg_domain_login',
+    # 'domain_name': 'sg_domain_login',
     'email': 'email',
     'phone': 'sg_telephone',
     'projects': 'projects',
@@ -96,8 +93,7 @@ def entity_cache(*args, **kwargs):
         entity  = 'User', 
         fields  = list(SG_FIELD_MAPS.values())
     )
-
-    rocketchat.rocketchat_user_room_cache()
+    # rocketchat.rocketchat_user_room_cache()
     
     return result
 
@@ -561,7 +557,6 @@ def get_user_downstream(payload):
     return downstream_datas
 
 def create_user_deadline(payload):
-    
     deadline = False
 
     # Check exist User Deadline

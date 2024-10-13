@@ -170,7 +170,7 @@ def single_entity_cache(entity='', fields=[]):
     """
     code_maps = {
         'step': 'short_name',
-        'user': 'sg_domain_login',
+        'user': 'login',
         'status': 'code',
         'software': 'code',
         'department': 'code',
@@ -186,7 +186,6 @@ def single_entity_cache(entity='', fields=[]):
         filters = [], 
         fields  = fields
     )
-
     # ----------------------------- #
     #       DELETE REDIS DATA       #
     # ----------------------------- #
