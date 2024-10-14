@@ -12,6 +12,7 @@ SG_FIELD_MAPS = {
     'departments': 'sg_departments',
     'rederers': 'sg_rederers',
     'software': 'sg_software',
+    'environment': 'sg_environment',
     'windows_path': 'windows_path',
     'default_shot': 'sg_default_shot',
     'default_asset': 'sg_default_asset'
