@@ -85,10 +85,10 @@ def entity_cache(*args, **kwargs):
 #       SHOTGRID ENTITY SEARCH       #
 # ================================== #
 def sg_entity_search(body):
-    project         = body.get('project')
-    project_id      = body.get('id')
-    project_type    = body.get('type')
-    shotgrid        = body.get('shotgrid') or False
+    project = body.get('project')
+    project_id = body.get('id')
+    project_type = body.get('type')
+    shotgrid = body.get('shotgrid') or False
 
     valid_keys = {
         'project',
@@ -105,8 +105,8 @@ def sg_entity_search(body):
     sg_result_adapter = []
 
     redis_name =  'sg:project:'
-    redis_name += f'*{project}:'    if project      else '*:'
-    redis_name += f'{project_id}'   if project_id   else '*'
+    redis_name += f'*{project}:' if project else '*:'
+    redis_name += f'{project_id}' if project_id else '*'
 
     redis_names = redis_ctl.keys(redis_name.lower())
 
@@ -145,9 +145,9 @@ def sg_entity_search(body):
             
         else:
             sg_result_adapter = sg_entity_utils.entity_response_adapter(
-                data        = sg_result, 
-                sg_fields   = SG_FIELD_MAPS_INVERT, 
-                str_fields  = STR_FIELDS
+                data  = sg_result, 
+                sg_fields  = SG_FIELD_MAPS_INVERT, 
+                str_fields = STR_FIELDS
             )
             
         # ------------------------------------- #
@@ -155,8 +155,8 @@ def sg_entity_search(body):
         # ------------------------------------- #
         for each_data in sg_result_adapter:
             zs_name =  'zs:project:'
-            zs_name += f'{each_data.get("name")}:'  if each_data.get('name')    else '*:'
-            zs_name += f'{each_data.get("id")}'     if each_data.get('id')      else '*'
+            zs_name += f'{each_data.get("name")}:' if each_data.get('name') else '*:'
+            zs_name += f'{each_data.get("id")}' if each_data.get('id') else '*'
             zs_data = redis_ctl.hgetall(zs_name.lower())
 
             if zs_data:
@@ -182,13 +182,13 @@ def mongo_project_insert(sg_create_result, username):
     # ------------------------------------- #
     #       INSERT PROJECT INTO MONGODB     #
     # ------------------------------------- #
-    mongo_project_      = mongo_project.ZeafrostProject()
-    mongo_project_data  = []
-    resolution_data     = OrderedDict()
+    mongo_project_ = mongo_project.ZeafrostProject()
+    mongo_project_data = []
+    resolution_data = OrderedDict()
 
     if len(sg_create_result) > 0:
         project_ids = [each.get('id') if isinstance(each, dict) else [] for each in mongo_project_.find().sort('id', -1)]
-        project_id  = project_ids[0] if len(project_ids) > 0 else 1
+        project_id = project_ids[0] if len(project_ids) > 0 else 1
 
         redis_usernames = redis_ctl.keys(f'sg:user:{username}:*'.lower())
         
@@ -200,17 +200,17 @@ def mongo_project_insert(sg_create_result, username):
             if project_resolution:
                 if re.search('[0-9]+x[0-9]+', project_resolution):
                     resolution_split = [int(each) for each in project_resolution.split('x')]
-                    resolution_data['preview']      = resolution_split
-                    resolution_data['review']       = resolution_split
-                    resolution_data['deliverable']  = resolution_split
+                    resolution_data['preview'] = resolution_split
+                    resolution_data['review'] = resolution_split
+                    resolution_data['deliverable'] = resolution_split
             
             proj_data = mongo_project_.schema_to_document(
-                project_code    = project_code,
-                project_id      = project_id,
-                shotgrid_id     = each_data.get('id'),
-                resolution      = resolution_data if isinstance(resolution_data, OrderedDict) else {},
-                project_path    = each_data.get('sg_project_path'),
-                username        = int(redis_usernames[0].split(':')[-1]) if len(redis_usernames) > 0 else None
+                project_code = project_code,
+                project_id = project_id,
+                shotgrid_id = each_data.get('id'),
+                resolution = resolution_data if isinstance(resolution_data, OrderedDict) else {},
+                project_path = each_data.get('sg_project_path'),
+                username = int(redis_usernames[0].split(':')[-1]) if len(redis_usernames) > 0 else None
             )
             mongo_project_data.append(proj_data)
         mongo_project_.insert_many(mongo_project_data)
@@ -260,13 +260,13 @@ def sg_entity_create(body):
             sg = sg_con.connect()
             result = sg.batch(sg_data)
             
-            thread_project_mongo    = threading.Thread(
-                target  = mongo_project_insert, 
-                args    = (result, username,))
+            thread_project_mongo = threading.Thread(
+                target = mongo_project_insert, 
+                args = (result, username,))
 
             thread_directory_create = threading.Thread(
-                target  = create_directory, 
-                args    = (data,)
+                target = create_directory, 
+                args = (data,)
             )
 
             thread_project_mongo.start()
@@ -287,7 +287,7 @@ def sg_entity_update(body):
 
     for each in data:
         filters = each.get('filters')
-        values  = each.get('values')
+        values = each.get('values')
 
         project = filters.get('project')
 
@@ -331,8 +331,8 @@ def sg_entity_delete(body):
             project_id = project_dict.get('project_id')
             
             redis_name =  'sg:project:'
-            redis_name += f'*{project}:'    if project      else '*:'
-            redis_name += f'{project_id}'   if project_id   else '*'
+            redis_name += f'*{project}:' if project  else '*:'
+            redis_name += f'{project_id}' if project_id  else '*'
             redis_names = redis_ctl.keys(redis_name.lower())
             
             if len(redis_names) > 0:
@@ -344,8 +344,8 @@ def sg_entity_delete(body):
 
                     project_dict = {
                         'request_type': 'delete', 
-                        'entity_type':  'Project', 
-                        'entity_id':    shotgrid_id
+                        'entity_type': 'Project', 
+                        'entity_id': shotgrid_id
                     }
 
                     sg_data.append(project_dict)

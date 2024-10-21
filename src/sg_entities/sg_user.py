@@ -90,8 +90,8 @@ DEPARTMENT_MAP = {
 # ========================= #
 def entity_cache(*args, **kwargs):
     result = sg_entity_utils.single_entity_cache(
-        entity  = 'User', 
-        fields  = list(SG_FIELD_MAPS.values())
+        entity='User', 
+        fields=list(SG_FIELD_MAPS.values())
     )
     # rocketchat.rocketchat_user_room_cache()
     
@@ -101,16 +101,15 @@ def entity_cache(*args, **kwargs):
 #       SHOTGRID ENTITY SEARCH       #
 # ================================== #
 def sg_entity_search(body):
-    shotgrid    = body.get('shotgrid') or False
-    username    = body.get('username')
-    user_id     = body.get('id')
+    shotgrid = body.get('shotgrid') or False
+    username = body.get('username')
+    user_id = body.get('id')
     downstream = body.get('downstream') or False
 
     result = []
 
     if downstream:
         result = get_user_downstream(payload=body)
-
     else:
         valid_keys = {
             'shotgrid',
@@ -121,17 +120,17 @@ def sg_entity_search(body):
         if not set(body.keys()).issubset(valid_keys):
             return []
 
-        redis_name  =  'sg:user:'
-        redis_name  += f'{username}:'   if username     else '*:'
-        redis_name  += f'{user_id}'     if user_id      else '*'
+        redis_name = 'sg:user:'
+        redis_name += f'{username}:' if username else '*:'
+        redis_name += f'{user_id}' if user_id else '*'
         redis_names = redis_ctl.keys(redis_name.lower())
 
         result = sg_entity_utils.entity_cache_search(
-            redis_name   = redis_name.lower(),
-            redis_names  = redis_names,
-            entity_cache = sg_entity_utils.single_entity_cache_callback(
-                entity   = 'User', 
-                fields   = list(SG_FIELD_MAPS.values())
+            redis_name=redis_name.lower(),
+            redis_names=redis_names,
+            entity_cache=sg_entity_utils.single_entity_cache_callback(
+                entity='User',
+                fields=list(SG_FIELD_MAPS.values())
             )
         )
 
@@ -139,7 +138,7 @@ def sg_entity_search(body):
         if shotgrid:
             return result
         else:
-            return response_adapter(result) 
+            return response_adapter(result)
     else:
         return []
 
@@ -155,15 +154,11 @@ def sg_entity_create(body):
     sg_data = []
 
     for each_data in data:
-
         data_sg_key = {}
 
         for key in each_data.keys():
-
             if key in SG_FIELD_MAPS.keys():
-
                 if key == 'groups':
-
                     if each_data['groups'] == 'ygg':
                         data_sg_key['groups'] = [{'id': 146, 'name': 'YGG', 'type': 'Group'}]
 
@@ -171,7 +166,6 @@ def sg_entity_create(body):
                          data_sg_key['groups'] = [{'id': 147, 'name': 'freelance', 'type': 'Group'}]
 
                 elif key == 'department':
-
                     sg_department_find_result = sg.find_one(
                         'Department',
                         filters = [
@@ -185,7 +179,6 @@ def sg_entity_create(body):
                             'type': 'Department'}
 
                 elif key == 'division':
-
                     if each_data['division'] == 1 or each_data['division'] == 'vfx':
                         data_sg_key['sg_division'] = 'VFX'
 
@@ -194,12 +187,10 @@ def sg_entity_create(body):
 
                     elif each_data['division'] == 4 or 'game' in each_data['division']:
                         data_sg_key['sg_division'] = 'Game'
-
                 else:
                     data_sg_key[SG_FIELD_MAPS[key]] = each_data[key]
 
         if data_sg_key:
-
             if not 'sg_status_list' in data_sg_key.keys():
                 data_sg_key['sg_status_list'] = 'dis'
 
@@ -208,7 +199,6 @@ def sg_entity_create(body):
                 'entity_type': 'HumanUser',
                 'data': data_sg_key
             }
-
             sg_user_find_result = sg.find_one(
                 'HumanUser',
                 filters = [
@@ -222,7 +212,6 @@ def sg_entity_create(body):
         # Create User Deadline
         #---------------------
         if each_data.get('deadline'):
-
             deadline_payload = {'username':'', 'groups': ''}
             result_deadline = create_user_deadline(deadline_payload)
 
@@ -239,19 +228,16 @@ def sg_entity_create(body):
 #       SHOTGRID ENTITY UPDATE       #
 # ================================== #
 def sg_entity_update(body):
-
     data = body.get('data') or []
     result = []
 
     sg = sg_con.connect()
     sg_data = []
-
     ignore_update = ['first_name', 'firstname', 'last_name', 'lastname', 'email']
 
     for each in data:
         filters = each.get('filters')
         values = each.get('values')
-
         check_ignore = set(ignore_update).intersection(values)
 
         if check_ignore:
@@ -260,7 +246,6 @@ def sg_entity_update(body):
 
         if filters and values:
             user = each['filters'].get('domain_name') or each['filters'].get('username')
-
             redis_user_names = redis_ctl.keys(f'sg:user:{user}:*'.lower())
 
             if len(redis_user_names) > 0:
@@ -269,19 +254,14 @@ def sg_entity_update(body):
                 data_sg_key = {}
 
                 for key in values.keys():
-
                     if key in SG_FIELD_MAPS.keys():
-
                         if key == 'groups':
-
                             if values['groups'] == 'ygg':
                                 data_sg_key['groups'] = [{'id': 146, 'name': 'YGG', 'type': 'Group'}]
-
                             elif values['freelance'] == 'ygg':
                                 data_sg_key['groups'] = [{'id': 147, 'name': 'freelance', 'type': 'Group'}]
 
                         elif key == 'department':
-
                             sg_department_find_result = sg.find_one(
                                 'Department',
                                 filters = [
@@ -295,7 +275,6 @@ def sg_entity_update(body):
                                     'type': 'Department'}
 
                         elif key == 'division':
-
                             if values['division'] == 1 or values['division'] == 'vfx':
                                 data_sg_key['sg_division'] = 'VFX'
 
@@ -304,18 +283,15 @@ def sg_entity_update(body):
 
                             elif values['division'] == 4 or 'game' in values['division']:
                                 data_sg_key['sg_division'] = 'Game'
-
                         else:
                             data_sg_key[SG_FIELD_MAPS[key]] = values[key]
 
                 if data_sg_key:
-
                     data_dict = {
                         'request_type': 'update',
                         'entity_type': 'HumanUser',
                         'entity_id': int(entity_id),
                         'data': data_sg_key }
-
                     sg_data.append(data_dict)
         else:
             if check_ignore:
@@ -327,7 +303,6 @@ def sg_entity_update(body):
                 return result
 
     if sg_data:
-        # pprint(sg_data)
         result = sg.batch(sg_data)
 
     if result:
@@ -340,34 +315,26 @@ def sg_entity_update(body):
 #         SHOTGRID USER SYNC         #
 # ================================== #
 def user_sync(body):
-
     result = {'code':200, 'message': '', 'result':[]}
     
     itc = intercon.Intercon()
     itcUsers = itc.user()
-
     sg_users = sg_entity_search(body)
 
     payloads_create = []
     payloads_update = []
-    
     for itcUser in itcUsers:
-
         if itcUser.get('domain_login') and not itcUser.get('domain_login') == 'sysadmin':
-
             if itcUser.get('div_id') in [1, 2, 4]:   # ['VFX', 'ANIM', 'GAME']
                 sg_id = ''
                 user_data = {}
-
                 for sg_user in sg_users:
                     if itcUser.get('domain_login') == sg_user.get('domain_name'):
                         sg_id = sg_user.get('id')
                         user_data = sg_user
 
                 if itcUser.get('status') == 1 or itcUser.get('status') == 8:
-
                     if sg_id:
-                        
                         value = {}
                         payload_update = {
                             'filters': {'domain_name': itcUser.get('domain_login')},
@@ -375,11 +342,9 @@ def user_sync(body):
                         }
 
                         if  itcUser.get('domain_login') == 'thaksaporn':
-                            
                             # parse map number division
                             #--------------------------
                             div_id = 0
-
                             if user_data.get('division') == 'Animation':
                                 div_id = 2
                             elif 'VFX' in user_data.get('division'):
@@ -407,7 +372,6 @@ def user_sync(body):
                                 payloads_update.append(payload_update)
 
                     else:
-                        
                         division_txt = DIVISION_MAP[itcUser.get('div_id')] or ''
                         login = '{}.{}'.format(division_txt , itcUser.get('domain_login'))
 

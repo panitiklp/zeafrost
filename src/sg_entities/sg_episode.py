@@ -29,9 +29,9 @@ SG_FIELD_MAPS_INVERT = {val: key for key, val in SG_FIELD_MAPS.items()}
 #       ENTITY CACHE        #
 # ========================= #
 def entity_cache(*args, **kwargs):
-    project         = ''
-    redis_pattern   = ''
-    sg_result       = []
+    project = ''
+    redis_pattern = ''
+    sg_result = []
 
     for arg in [each for each in args if isinstance(each, dict)]:
         for key, val in arg.items():
@@ -44,10 +44,10 @@ def entity_cache(*args, **kwargs):
     if project:
         sg = sg_con.connect()
         sg_result = sg.find(
-            'Episode', 
-            filters =   [['project', 'name_contains', project]],
-            fields  =   list(SG_FIELD_MAPS.values()),
-            order   =   [{'field_name': 'code', 'direction':'asc'}]
+            'Episode',
+            filters=[['project', 'name_contains', project]],
+            fields=list(SG_FIELD_MAPS.values()),
+            order=[{'field_name': 'code', 'direction': 'asc'}]
         )
 
         redis_pattern = f'sg:episode:*{project}:*'.lower()
@@ -57,7 +57,7 @@ def entity_cache(*args, **kwargs):
         sg_project = elem.get('project')
 
         if sg_project:
-            redis_name =  'sg:episode:'
+            redis_name = 'sg:episode:'
             redis_name += f'{sg_project.get("name")}:'
             redis_name += f'{elem.get("code")}:'
             redis_name += f'{elem.get("id")}'
@@ -69,10 +69,10 @@ def entity_cache(*args, **kwargs):
 #       SHOTGRID ENTITY SEARCH       #
 # ================================== #
 def sg_entity_search(body):
-    shotgrid    = body.get('shotgrid') or False
-    project     = body.get('project')
-    episode     = body.get('episode')
-    episode_id  = body.get('id')
+    shotgrid = body.get('shotgrid') or False
+    project = body.get('project')
+    episode = body.get('episode')
+    episode_id = body.get('id')
 
     valid_keys = {
         'shotgrid',
@@ -83,15 +83,15 @@ def sg_entity_search(body):
 
     if not set(body.keys()).issubset(valid_keys):
         return []
-    
+
     result = []
 
-    redis_name =  'sg:episode:'
-    redis_name += f'*{project}:'    if project      else '*:'
-    redis_name += f'*{episode}:'    if episode      else '*:'
-    redis_name += f'{episode_id}'   if episode_id   else '*'
+    redis_name = 'sg:episode:'
+    redis_name += f'*{project}:' if project else '*:'
+    redis_name += f'*{episode}:' if episode else '*:'
+    redis_name += f'{episode_id}' if episode_id else '*'
     redis_names = redis_ctl.keys(redis_name.lower())
-    
+
     if len(redis_names) > 0:
         for redis_name in sorted(redis_names):
             episode_data = redis_ctl.hgetall(redis_name)
@@ -106,10 +106,10 @@ def sg_entity_search(body):
                 result.append(episode_data)
 
     return sg_entity_utils.search_response(
-        data        = result, 
-        shotgrid    = shotgrid, 
-        sg_fields   = SG_FIELD_MAPS_INVERT, 
-        str_fields  = ['code', 'name', 'episode']
+        data=result,
+        shotgrid=shotgrid,
+        sg_fields=SG_FIELD_MAPS_INVERT,
+        str_fields=['code', 'name', 'episode']
     )
 
 # ================================== #
@@ -118,7 +118,7 @@ def sg_entity_search(body):
 def sg_entity_create(body):
     data = body.get('data')
     result = False
-    
+
     projects = {}
     for each in data:
         project = each.get('project')
@@ -126,20 +126,20 @@ def sg_entity_create(body):
 
         if len(redis_project_names) > 0:
             project_result = redis_ctl.hgetall(redis_project_names[0])
-            
+
             projects[each.get('project')] = {
-                'id':   int(project_result.get('id')),
+                'id': int(project_result.get('id')),
                 'code': project_result.get('code'),
                 'path': project_result.get('sg_project_path')
             }
-    
+
     if projects:
         # ----------------------------------------- #
         #       CACHE BEFORE EPISODE PROCESS        #
         # ----------------------------------------- #
         for project_name, project_data in projects.items():
             entity_cache(project_id=project_data.get('id'))
-    
+
         # ------------------------- #
         #       CREATE EPISODE      #
         # ------------------------- #
@@ -148,42 +148,41 @@ def sg_entity_create(body):
             project = episode_data.get('project')
             episode = episode_data.get('episode')
 
-            redis_episode_name =  'sg:episode:'
-            redis_episode_name += f'*{project}:'    if project else '*:'
-            redis_episode_name += f'*{episode}:*'   if episode else '*'
+            redis_episode_name = 'sg:episode:'
+            redis_episode_name += f'*{project}:' if project else '*:'
+            redis_episode_name += f'*{episode}:*' if episode else '*'
             redis_episode_names = redis_ctl.keys(redis_episode_name.lower())
 
             if len(redis_episode_names) == 0 and projects.get(project):
                 episode_data = {
                     'request_type': 'create',
                     'entity_type': 'Episode',
-                    'data':{
-                        'project':          {'type': 'Project', 'id': projects[project]['id']},
-                        'code':             episode,
-                        'sg_short_name':    episode,
-                        'sg_status_list':   'wtg',
-                        'description':      episode_data.get('description'),
-                        'sg_frame_rate':    episode_data.get('frame_rate'),
-                        'sg_resolution':    episode_data.get('resolution')
+                    'data': {
+                        'project': {'type': 'Project', 'id': projects[project]['id']},
+                        'code': episode,
+                        'sg_short_name': episode,
+                        'sg_status_list': 'wtg',
+                        'description': episode_data.get('description'),
+                        'sg_frame_rate': episode_data.get('frame_rate'),
+                        'sg_resolution': episode_data.get('resolution')
                     }
                 }
                 sg_data.append(episode_data)
-            
+
         if len(sg_data) > 0:
             sg = sg_con.connect()
-
             result = sg.batch(sg_data)
 
-            thread_dir  = threading.Thread(target=create_directory, args=(projects, data,))
+            thread_dir = threading.Thread(target=create_directory, args=(projects, data,))
             thread_dir.start()
-            
+
         # ---------------------------------------- #
         #       CACHE AFTER EPISODE PROCESS        #
         # ---------------------------------------- #
         for project_name, project_data in projects.items():
             thread_cache = threading.Thread(
-                target  =   entity_cache, 
-                kwargs  =   {'project': project_name}
+                target=entity_cache,
+                kwargs={'project': project_name}
             )
             thread_cache.start()
 
@@ -201,7 +200,7 @@ def sg_entity_update(body):
 
     for each_data in data:
         filters = each_data.get('filters')
-        values  = each_data.get('values')
+        values = each_data.get('values')
 
         project = filters.get('project')
         episode = filters.get('episode')
@@ -225,14 +224,14 @@ def sg_entity_update(body):
             #       GET EPISODE ID        #
             # --------------------------- #
             if project_id:
-                redis_name  =   'sg:episode:'
-                redis_name  +=  f'*{project}:'      if project      else '*:'
-                redis_name  +=  f'*{episode}:'      if episode      else '*:'
-                redis_name  +=  f'{episode_id}'     if episode_id   else '*'
-                redis_names =   redis_ctl.keys(redis_name.lower())
-                
+                redis_name = 'sg:episode:'
+                redis_name += f'*{project}:' if project else '*:'
+                redis_name += f'*{episode}:' if episode else '*:'
+                redis_name += f'{episode_id}' if episode_id else '*'
+                redis_names = redis_ctl.keys(redis_name.lower())
+
                 if len(redis_names) > 0:
-                    entity_id = int(redis_names[0].split(':')[-1]) 
+                    entity_id = int(redis_names[0].split(':')[-1])
 
                     sg_data = {}
                     if values:
@@ -242,9 +241,9 @@ def sg_entity_update(body):
                     sg_update_data.append(
                         {
                             'request_type': 'update',
-                            'entity_type':  'Episode',
-                            'entity_id':    entity_id,
-                            'data':         sg_data
+                            'entity_type': 'Episode',
+                            'entity_id': entity_id,
+                            'data': sg_data
                         }
                     )
     # ------------------------- #
@@ -255,11 +254,11 @@ def sg_entity_update(body):
         result = sg.batch(sg_update_data)
 
         thread_redis_cache_update = threading.Thread(
-            target  =   entity_cache, 
-            kwargs  =   {'project_id': project_id}
+            target=entity_cache,
+            kwargs={'project_id': project_id}
         )
         thread_redis_cache_update.start()
-        
+
     return result
 
 # ================================== #
@@ -268,22 +267,22 @@ def sg_entity_update(body):
 def sg_entity_delete(body):
     data = body.get('data')
     result = []
-    
+
     if data:
         projects = {}
         for each_data in data:
             project = each_data.get('project')
             redis_project_names = redis_ctl.keys(f'sg:project:{project}:*'.lower())
-            
+
             if len(redis_project_names) > 0:
                 project_result = redis_ctl.hgetall(redis_project_names[0])
-                
+
                 projects[each_data.get('project')] = {
-                    'id':   int(project_result.get('id')),
+                    'id': int(project_result.get('id')),
                     'code': project_result.get('code'),
                     'path': project_result.get('sg_project_path')
                 }
-        
+
         if projects:
             # ----------------------------------------- #
             #       CACHE BEFORE EPISODE PROCESS        #
@@ -300,35 +299,34 @@ def sg_entity_delete(body):
                 episode = episode_data.get('episode')
                 episode_id = episode_data.get('id')
 
-                redis_episode_name =  'sg:episode:'
-                redis_episode_name += f'*{project}:'    if project      else '*:'
-                redis_episode_name += f'*{episode}:'    if episode      else '*:'
-                redis_episode_name += f'{episode_id}'   if episode_id   else '*'
+                redis_episode_name = 'sg:episode:'
+                redis_episode_name += f'*{project}:' if project else '*:'
+                redis_episode_name += f'*{episode}:' if episode else '*:'
+                redis_episode_name += f'{episode_id}' if episode_id else '*'
                 redis_episode_names = redis_ctl.keys(redis_episode_name.lower())
 
                 if len(redis_episode_names) > 0 and projects.get(project):
                     episode_data = {
                         'request_type': 'delete',
-                        'entity_type':  'Episode',
-                        'entity_id':    int(redis_episode_names[0].split(':')[-1])
+                        'entity_type': 'Episode',
+                        'entity_id': int(redis_episode_names[0].split(':')[-1])
                     }
                     sg_data.append(episode_data)
-                
+
             if len(sg_data) > 0:
                 sg = sg_con.connect()
-
                 result = sg.batch(sg_data)
 
-                thread_dir  = threading.Thread(target=delete_directory, args=(projects, data,))
+                thread_dir = threading.Thread(target=delete_directory, args=(projects, data,))
                 thread_dir.start()
-                            
+
             # ---------------------------------------- #
             #       CACHE AFTER EPISODE PROCESS        #
             # ---------------------------------------- #
             for project_name, project_data in projects.items():
                 thread_cache = threading.Thread(
-                    target  = entity_cache, 
-                    kwargs  = {'project_id': int(project_data.get('id'))}
+                    target=entity_cache,
+                    kwargs={'project_id': int(project_data.get('id'))}
                 )
                 thread_cache.start()
 
@@ -350,14 +348,14 @@ def create_directory(projects, data):
 
     Returns:
         True
-    '''    
+    '''
     for episode_data in data:
         if episode_data.get('directory') == True:
             project_path = projects[episode_data.get('project')]['path']
 
             if CUR_PLATFORM == 'linux':
                 project_path = sg_entity_utils.convert_path_windows_to_linux(project_path)
-            
+
             if os.path.exists(project_path):
                 for _dir in dir_template.EPISODE_DIRECTORIES:
                     dir_path = f'{project_path}/{_dir.format(ep=episode_data.get("episode"))}'
@@ -375,7 +373,7 @@ def delete_directory(projects, data):
 
             if CUR_PLATFORM == 'linux':
                 project_path = sg_entity_utils.convert_path_windows_to_linux(project_path)
-            
+
             if os.path.exists(project_path):
                 for _dir in dir_template.EPISODE_DIRECTORIES:
                     dir_path = f'{project_path}/{_dir.format(ep=episode_data.get("episode"))}'

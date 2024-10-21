@@ -17,19 +17,18 @@ STR_FIELDS = ['code', 'short_name']
 # ========================= #
 def entity_cache(*args, **kwargs):
     result = sg_entity_utils.single_entity_cache(
-        entity  = 'PublishedFileType', 
-        fields  = list(SG_FIELD_MAPS.values())
+        entity='PublishedFileType', 
+        fields=list(SG_FIELD_MAPS.values())
     )
-
     return result
 
 # ================================== #
 #       SHOTGRID ENTITY SEARCH       #
 # ================================== #
 def sg_entity_search(body):
-    shotgrid            = body.get('shotgrid') or False
-    published_type      = body.get('type')
-    published_type_id   = body.get('id')
+    shotgrid = body.get('shotgrid') or False
+    published_type = body.get('type')
+    published_type_id = body.get('id')
 
     valid_keys = {
         'shotgrid',
@@ -42,17 +41,17 @@ def sg_entity_search(body):
     
     result = []
 
-    redis_name  =  'sg:publishedfiletype:'
-    redis_name  += f'{published_type}:'         if published_type       else '*:'
-    redis_name  += f'{published_type_id}'       if published_type_id    else '*'
+    redis_name = 'sg:publishedfiletype:'
+    redis_name += f'{published_type}:' if published_type else '*:'
+    redis_name += f'{published_type_id}' if published_type_id else '*'
     redis_names = redis_ctl.keys(redis_name.lower())
 
     result = sg_entity_utils.entity_cache_search(
-        redis_name      = redis_name,
-        redis_names     = redis_names,
-        entity_cache    = sg_entity_utils.single_entity_cache_callback(
-            entity  = 'PublishedFileType', 
-            fields  = list(SG_FIELD_MAPS.values())
+        redis_name=redis_name,
+        redis_names=redis_names,
+        entity_cache=sg_entity_utils.single_entity_cache_callback(
+            entity='PublishedFileType', 
+            fields=list(SG_FIELD_MAPS.values())
         )
     )
     
@@ -60,7 +59,7 @@ def sg_entity_search(body):
         return result
     else:
         return sg_entity_utils.entity_response_adapter(
-            data        = result, 
-            sg_fields   = SG_FIELD_MAPS_INVERT,
-            str_fields  = STR_FIELDS
+            data=result, 
+            sg_fields=SG_FIELD_MAPS_INVERT,
+            str_fields=STR_FIELDS
         )

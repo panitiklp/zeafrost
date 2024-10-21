@@ -76,18 +76,18 @@ def sg_entity_single_type_search(project, asset_type, asset, variation, asset_id
 
     redis_name = ''
     if variation:
-        redis_name =  'sg:asset:'
-        redis_name += f'*{project}:'    if project      else '*:'
-        redis_name += f'{asset_type}:'  if asset_type   else '*:'
-        redis_name += f'{asset}'        if asset        else '*'
-        redis_name += f'_{variation}:'  if variation    else '*:'
-        redis_name += f'{asset_id}'     if asset_id     else '*'
+        redis_name = 'sg:asset:'
+        redis_name += f'*{project}:' if project else '*:'
+        redis_name += f'{asset_type}:' if asset_type else '*:'
+        redis_name += f'{asset}' if asset else '*'
+        redis_name += f'_{variation}:' if variation else '*:'
+        redis_name += f'{asset_id}' if asset_id else '*'
     else:
-        redis_name =  'sg:asset:'
-        redis_name += f'*{project}:'    if project      else '*:'
-        redis_name += f'{asset_type}:'  if asset_type   else '*:'
-        redis_name += f'{asset}:'       if asset        else '*:'
-        redis_name += f'{asset_id}'     if asset_id     else '*'
+        redis_name = 'sg:asset:'
+        redis_name += f'*{project}:' if project else '*:'
+        redis_name += f'{asset_type}:' if asset_type else '*:'
+        redis_name += f'{asset}:' if asset else '*:'
+        redis_name += f'{asset_id}' if asset_id else '*'
     
     redis_names = redis_ctl.keys(redis_name.lower())
 
@@ -111,14 +111,14 @@ def sg_entity_single_type_search(project, asset_type, asset, variation, asset_id
 #       SHOTGRID ENTITY SEARCH       #
 # ================================== #
 def sg_entity_search(body):
-    shotgrid    = body.get('shotgrid') or False
-    project     = body.get('project')
-    asset_type  = body.get('type') or body.get('asset_type')
+    shotgrid = body.get('shotgrid') or False
+    project = body.get('project')
+    asset_type = body.get('type') or body.get('asset_type')
     asset_types = body.get('types') or body.get('asset_types')
-    asset       = body.get('asset')
-    asset_id    = body.get('id')
-    asset_ids    = body.get('ids')
-    variation   = body.get('variation')
+    asset = body.get('asset')
+    asset_id = body.get('id')
+    asset_ids = body.get('ids')
+    variation = body.get('variation')
 
     valid_keys = {
         'shotgrid',
@@ -135,46 +135,46 @@ def sg_entity_search(body):
 
     if not set(body.keys()).issubset(valid_keys):
         return []
-    
+
     if asset_types:
         result = []
 
         for type_ in asset_types:
             asset_data = sg_entity_single_type_search(project, type_, asset, variation, asset_id)
             asset_result = sg_entity_utils.search_response(
-                data        = asset_data, 
-                shotgrid    = shotgrid, 
-                sg_fields   = SG_FIELD_MAPS_INVERT, 
-                str_fields  = STR_FIELDS
+                data=asset_data,
+                shotgrid=shotgrid,
+                sg_fields=SG_FIELD_MAPS_INVERT,
+                str_fields=STR_FIELDS
             )
             result.append(asset_result)
-            
+
         return result
-    
+
     elif asset_ids:
         result = []
-        
+
         for _id in asset_ids:
             asset_data = sg_entity_single_type_search(project, asset_type, asset, variation, _id)
             asset_result = sg_entity_utils.search_response(
-                data        = asset_data, 
-                shotgrid    = shotgrid, 
-                sg_fields   = SG_FIELD_MAPS_INVERT,
-                str_fields  = STR_FIELDS
+                data=asset_data,
+                shotgrid=shotgrid,
+                sg_fields=SG_FIELD_MAPS_INVERT,
+                str_fields=STR_FIELDS
             )
 
             result.append(asset_result)
-        
+
         return result
-    
+
     else:
         result = sg_entity_single_type_search(project, asset_type, asset, variation, asset_id)
 
         return sg_entity_utils.search_response(
-            data        = result, 
-            shotgrid    = shotgrid, 
-            sg_fields   = SG_FIELD_MAPS_INVERT,
-            str_fields  = STR_FIELDS
+            data=result,
+            shotgrid=shotgrid,
+            sg_fields=SG_FIELD_MAPS_INVERT,
+            str_fields=STR_FIELDS
         )
 
 # ================================== #
@@ -270,13 +270,13 @@ def sg_entity_update(body):
 
     for each in data:
         filters = each.get('filters')
-        values  = each.get('values')
+        values = each.get('values')
 
-        project     = filters.get('project')
-        asset_type  = filters.get('type')
-        asset       = filters.get('asset')
-        variation   = filters.get('variation')
-        asset_id    = filters.get('id')
+        project = filters.get('project')
+        asset_type = filters.get('type')
+        asset = filters.get('asset')
+        variation = filters.get('variation')
+        asset_id = filters.get('id')
 
         redis_project_data = sg_entity_utils.redis_get_project_data(project=project.lower())
 
@@ -298,18 +298,18 @@ def sg_entity_update(body):
             redis_name = ''
 
             if variation:
-                redis_name =  'sg:asset:'
-                redis_name += f'*{project}:'    if project      else '*:'
-                redis_name += f'{asset_type}:'  if asset_type   else '*:'
-                redis_name += f'{asset}'        if asset        else '*'
-                redis_name += f'_{variation}:'  if variation    else '*:'
-                redis_name += f'{asset_id}'     if asset_id     else '*'
+                redis_name = 'sg:asset:'
+                redis_name += f'*{project}:' if project else '*:'
+                redis_name += f'{asset_type}:' if asset_type else '*:'
+                redis_name += f'{asset}' if asset else '*'
+                redis_name += f'_{variation}:' if variation else '*:'
+                redis_name += f'{asset_id}' if asset_id else '*'
             else:
-                redis_name =  'sg:asset:'
-                redis_name += f'*{project}:'    if project      else '*:'
-                redis_name += f'{asset_type}:'  if asset_type   else '*:'
-                redis_name += f'{asset}:'       if asset        else '*:'
-                redis_name += f'{asset_id}'     if asset_id     else '*'
+                redis_name = 'sg:asset:'
+                redis_name += f'*{project}:' if project else '*:'
+                redis_name += f'{asset_type}:' if asset_type else '*:'
+                redis_name += f'{asset}:' if asset else '*:'
+                redis_name += f'{asset_id}' if asset_id else '*'
             
             redis_names = redis_ctl.keys(redis_name.lower())             
             entity_id = int(redis_names[0].split(':')[-1]) if len(redis_names) > 0 else None
@@ -322,9 +322,9 @@ def sg_entity_update(body):
                 sg_update_data.append(
                     {
                         'request_type': 'update',
-                        'entity_type':  'Asset',
-                        'entity_id':    entity_id,
-                        'data':         sg_data
+                        'entity_type': 'Asset',
+                        'entity_id': entity_id,
+                        'data': sg_data
                     }
                 )
     

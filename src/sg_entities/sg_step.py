@@ -16,10 +16,9 @@ STR_FIELDS = ['short_name']
 # ========================= #
 def entity_cache(*args, **kwargs):
     result = sg_entity_utils.single_entity_cache(
-        entity  = 'Step', 
-        fields  = list(SG_FIELD_MAPS.values())
+        entity='Step', 
+        fields=list(SG_FIELD_MAPS.values())
     )
-
     return result
 
 # ================================== #
@@ -39,19 +38,19 @@ def sg_entity_search(body):
     if not set(body.keys()).issubset(valid_keys):
         return []
     
-    result  = []
+    result = []
 
-    redis_name  =  'sg:step:'
-    redis_name  += f'{step}:'       if step     else '*:'
-    redis_name  += f'{step_id}'     if step_id  else '*'
+    redis_name = 'sg:step:'
+    redis_name += f'{step}:' if step else '*:'
+    redis_name += f'{step_id}' if step_id else '*'
     redis_names = redis_ctl.keys(redis_name.lower())
 
     result = sg_entity_utils.entity_cache_search(
-        redis_name      = redis_name,
-        redis_names     = redis_names,
-        entity_cache    = sg_entity_utils.single_entity_cache_callback(
-            entity  = 'Step', 
-            fields  = list(SG_FIELD_MAPS.values())
+        redis_name=redis_name,
+        redis_names=redis_names,
+        entity_cache=sg_entity_utils.single_entity_cache_callback(
+            entity='Step', 
+            fields=list(SG_FIELD_MAPS.values())
         )
     )
 
@@ -60,10 +59,9 @@ def sg_entity_search(body):
             return result
         else:
             return sg_entity_utils.entity_response_adapter(
-                data        = result,
-                sg_fields   = SG_FIELD_MAPS_INVERT,
-                str_fields  = STR_FIELDS
+                data=result,
+                sg_fields=SG_FIELD_MAPS_INVERT,
+                str_fields=STR_FIELDS
             )
-                
     else:
         return []

@@ -10,20 +10,18 @@ def sg_entity_search(body):
 
     sg_filters = []
     result = []
-    
-    if project: 
+
+    if project:
         sg_filters += [['project', 'name_contains', project]]
-    if episode: 
+    if episode:
         sg_filters += [['sg_episode', 'name_contains', episode]]
-    
+
     if sg_filters:
         sg = sg_con.connect()
-
         result = sg.find(
             entity.title(),
-            filters = sg_filters,
-            fields  = ['image']
+            filters=sg_filters,
+            fields=['image']
         )
 
     return result
-

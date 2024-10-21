@@ -77,19 +77,19 @@ def entity_cache(*args, **kwargs):
         sg_result = sg.find(
             'Shot', 
             filters = [['project', 'name_contains', project]],
-            fields  = list(SG_FIELD_MAPS.values()),
-            order   = [{'field_name': 'code', 'direction':'asc'}]
+            fields = list(SG_FIELD_MAPS.values()),
+            order = [{'field_name': 'code', 'direction':'asc'}]
         )
 
         redis_pattern = f'sg:shot:*{project}:*'.lower()
         redis_ctl.delete(redis_pattern)
 
     for elem in sg_result:
-        _sg_project  = elem.get('project')
-        _sg_episode  = elem.get('sg_episode.Episode.code')
+        _sg_project = elem.get('project')
+        _sg_episode = elem.get('sg_episode.Episode.code')
         _sg_sequence = elem.get('sg_sequence.Sequence.code')
         if _sg_project and _sg_episode and _sg_sequence:
-            redis_name =  'sg:shot:'
+            redis_name = 'sg:shot:'
             redis_name += f'{_sg_project.get("name")}:'
             redis_name += f'{_sg_episode}:'
             redis_name += f'{_sg_sequence}:'
@@ -107,12 +107,12 @@ def sg_entity_single_sequence_search(project, episode, sequence, shot, shot_id, 
         redis_names = redis_ctl.keys(f'sg:shot:*{shot.lower()}:*')
 
     else:
-        redis_name =  'sg:shot:'
-        redis_name += f'*{project}:'    if project  else '*:'
-        redis_name += f'*{episode}:'    if episode  else '*:'
-        redis_name += f'*_{sequence}:'  if sequence else '*:'
-        redis_name += f'*_{shot}:'      if shot     else '*:'
-        redis_name += f'{shot_id}'      if shot_id  else '*'
+        redis_name = 'sg:shot:'
+        redis_name += f'*{project}:' if project else '*:'
+        redis_name += f'*{episode}:' if episode else '*:'
+        redis_name += f'*_{sequence}:' if sequence else '*:'
+        redis_name += f'*_{shot}:' if shot else '*:'
+        redis_name += f'{shot_id}' if shot_id else '*'
         redis_names = redis_ctl.keys(redis_name.lower())
 
     if len(redis_names) > 0:
@@ -172,11 +172,11 @@ def sg_entity_search(body):
         for seq in sequences:
             seq_data   = sg_entity_single_sequence_search(project, episode, seq, shot, shot_id)
             seq_result = sg_entity_utils.search_response(
-                data        = seq_data, 
-                shotgrid    = shotgrid, 
-                sg_fields   = SG_FIELD_MAPS_INVERT, 
-                str_fields  = STR_FIELDS,
-                nested_entity_fields = NESTED_ENTITY_FOR_REDIS_FIELDS
+                data=seq_data, 
+                shotgrid=shotgrid, 
+                sg_fields=SG_FIELD_MAPS_INVERT, 
+                str_fields=STR_FIELDS,
+                nested_entity_fields=NESTED_ENTITY_FOR_REDIS_FIELDS
             )
 
             result.append(seq_result)
@@ -186,13 +186,13 @@ def sg_entity_search(body):
     if shots:
         result = []
         for _shot in shots:
-            shot_data   = sg_entity_single_sequence_search(project, episode, sequence, _shot, shot_id)
+            shot_data = sg_entity_single_sequence_search(project, episode, sequence, _shot, shot_id)
             shot_result = sg_entity_utils.search_response(
-                data        = shot_data, 
-                shotgrid    = shotgrid, 
-                sg_fields   = SG_FIELD_MAPS_INVERT, 
-                str_fields  = STR_FIELDS,
-                nested_entity_fields = NESTED_ENTITY_FOR_REDIS_FIELDS
+                data=result,
+                shotgrid=shotgrid,
+                sg_fields=SG_FIELD_MAPS_INVERT,
+                str_fields=STR_FIELDS,
+                nested_entity_fields=NESTED_ENTITY_FOR_REDIS_FIELDS
             )
             result.append(shot_result)
         
@@ -201,13 +201,13 @@ def sg_entity_search(body):
     elif shot_ids:
         result = []
         for _id in shot_ids:
-            shot_data   = sg_entity_single_sequence_search(project, episode, sequence, shot, _id)
+            shot_data = sg_entity_single_sequence_search(project, episode, sequence, shot, _id)
             shot_result = sg_entity_utils.search_response(
-                data        = shot_data, 
-                shotgrid    = shotgrid, 
-                sg_fields   = SG_FIELD_MAPS_INVERT, 
-                str_fields  = STR_FIELDS,
-                nested_entity_fields = NESTED_ENTITY_FOR_REDIS_FIELDS
+            data=shot_data, 
+            shotgrid=shotgrid, 
+            sg_fields=SG_FIELD_MAPS_INVERT, 
+            str_fields=STR_FIELDS,
+            nested_entity_fields=NESTED_ENTITY_FOR_REDIS_FIELDS
             )
             result.append(shot_result)
 
@@ -216,11 +216,11 @@ def sg_entity_search(body):
     else:
         result = sg_entity_single_sequence_search(project, episode, sequence, shot, shot_id, longname)
         return sg_entity_utils.search_response(
-            data        = result, 
-            shotgrid    = shotgrid, 
-            sg_fields   = SG_FIELD_MAPS_INVERT, 
-            str_fields  = STR_FIELDS,
-            nested_entity_fields = NESTED_ENTITY_FOR_REDIS_FIELDS
+            data=result, 
+            shotgrid=shotgrid, 
+            sg_fields=SG_FIELD_MAPS_INVERT, 
+            str_fields=STR_FIELDS,
+            nested_entity_fields=NESTED_ENTITY_FOR_REDIS_FIELDS
         )
 
 # ================================== #
@@ -260,66 +260,63 @@ def sg_entity_create(body):
 
         sg_data = []
         for shot_dict in data:
-            project     = shot_dict.get('project')
-            episode     = shot_dict.get('episode')
-            sequence    = shot_dict.get('sequence')
-            shot        = shot_dict.get('shot')
-            shot_id     = shot_dict.get('id')
-            redis_episode_name =  'sg:episode:'
-            redis_episode_name += f'*{project}:'    if project else '*:'
-            redis_episode_name += f'*{episode}:*'   if episode else '*:*'
+            project = shot_dict.get('project')
+            episode = shot_dict.get('episode')
+            sequence = shot_dict.get('sequence')
+            shot = shot_dict.get('shot')
+            shot_id = shot_dict.get('id')
+            redis_episode_name = 'sg:episode:'
+            redis_episode_name += f'*{project}:' if project else '*:'
+            redis_episode_name += f'*{episode}:*' if episode else '*:*'
             redis_episode_names = redis_ctl.keys(redis_episode_name.lower())
 
-            redis_sequence_name =  'sg:sequence:'
-            redis_sequence_name += f'*{project}:'       if project  else '*:'
-            redis_sequence_name += f'*{episode}:'       if episode  else '*:'
-            redis_sequence_name += f'*_{sequence}:*'    if sequence else '*:*'
+            redis_sequence_name = 'sg:sequence:'
+            redis_sequence_name += f'*{project}:' if project else '*:'
+            redis_sequence_name += f'*{episode}:' if episode else '*:'
+            redis_sequence_name += f'*_{sequence}:*' if sequence else '*:*'
             redis_sequence_names = redis_ctl.keys(redis_sequence_name.lower())
 
             if len(redis_episode_names) > 0 and len(redis_sequence_names) > 0:
-                episode_result  = redis_ctl.hgetall(redis_episode_names[0])
+                episode_result = redis_ctl.hgetall(redis_episode_names[0])
                 sequence_result = redis_ctl.hgetall(redis_sequence_names[0])
 
-                episode_name    = episode_result.get('sg_short_name')   if episode_result.get('sg_short_name')  else episode
-                sequence_name   = sequence_result.get('sg_short_name')  if sequence_result.get('sg_short_name') else sequence
-                
+                episode_name = episode_result.get('sg_short_name') if episode_result.get('sg_short_name') else episode
+                sequence_name = sequence_result.get('sg_short_name') if sequence_result.get('sg_short_name') else sequence
                 if episode_result and sequence_result:
-                    redis_shot_name =  'sg:shot:'
-                    redis_shot_name += f'*{project}:'   if project  else '*:'
-                    redis_shot_name += f'*{episode}:'   if episode  else '*:'
+                    redis_shot_name = 'sg:shot:'
+                    redis_shot_name += f'*{project}:' if project else '*:'
+                    redis_shot_name += f'*{episode}:' if episode else '*:'
                     redis_shot_name += f'*_{sequence}:' if sequence else '*:'
-                    redis_shot_name += f'*_{shot}:'     if shot     else '*:'
-                    redis_shot_name += f'{shot_id}'     if shot_id  else '*'
+                    redis_shot_name += f'*_{shot}:' if shot else '*:'
+                    redis_shot_name += f'{shot_id}' if shot_id else '*'
                     redis_shot_names = redis_ctl.keys(redis_shot_name.lower())
 
                     if len(redis_shot_names) == 0 and projects.get(project):
                         shot_data = {
                             'request_type': 'create',
-                            'entity_type':  'Shot',
+                            'entity_type': 'Shot',
                             'data':{
-                                'project':          {'type': 'Project', 'id': projects[project]['id']},
-                                'sg_episode':       {'type': 'Episode', 'id': int(episode_result.get('id'))},
-                                'sg_sequence':      {'type': 'Sequence', 'id': int(sequence_result.get('id'))},
-                                'code':             projects[project]['pattern']['shot']['longname'].format(
+                                'project': {'type': 'Project', 'id': projects[project]['id']},
+                                'sg_episode':  {'type': 'Episode', 'id': int(episode_result.get('id'))},
+                                'sg_sequence': {'type': 'Sequence', 'id': int(sequence_result.get('id'))},
+                                'code': projects[project]['pattern']['shot']['longname'].format(
                                     project=projects[project]['code'],
                                     episode=episode_name,
                                     sequence=sequence_name,
                                     shot=shot,
                                 ),
-                                'sg_short_name':    shot,
-                                'sg_status_list':   'wtg',
-                                'sg_cut_in':        int(shot_dict.get('cut_in')) if shot_dict.get('cut_in') else None,
-                                'sg_cut_out':       int(shot_dict.get('cut_out')) if shot_dict.get('cut_out') else None,
-                                'sg_cut_duration':  int(shot_dict.get('cut_duration')) if shot_dict.get('cut_duration') else None
+                                'sg_short_name': shot,
+                                'sg_status_list': 'wtg',
+                                'sg_cut_in': int(shot_dict.get('cut_in')) if shot_dict.get('cut_in') else None,
+                                'sg_cut_out': int(shot_dict.get('cut_out')) if shot_dict.get('cut_out') else None,
+                                'sg_cut_duration': int(shot_dict.get('cut_duration')) if shot_dict.get('cut_duration') else None
                             }
                         }
                         sg_data.append(shot_data)
 
         if len(sg_data) > 0:
             sg = sg_con.connect()
-
             result = sg.batch(sg_data)
-
             thread_dir  = threading.Thread(target=create_directory, args=(projects, data,))
             thread_dir.start()
 
@@ -352,14 +349,14 @@ def sg_entity_update(body):
 
     for each in data:
         filters = each.get('filters')
-        values  = each.get('values')
+        values = each.get('values')
         multi_entity_update_modes  = each.get('multi_entity_update_modes')  # add, remove, set // default: set
 
-        project     = filters.get('project')
-        episode     = filters.get('episode')
-        sequence    = filters.get('sequence')
-        shot        = filters.get('shot')
-        shot_id     = filters.get('id')
+        project = filters.get('project')
+        episode = filters.get('episode')
+        sequence = filters.get('sequence')
+        shot = filters.get('shot')
+        shot_id = filters.get('id')
 
         if project:
             redis_project_data = sg_entity_utils.redis_get_project_data(project=project.lower())
@@ -379,9 +376,9 @@ def sg_entity_update(body):
             #       GET EPISODE REDIS        #
             # ------------------------------ #
             if project_id:
-                redis_episode_name =  'sg:episode:'
-                redis_episode_name += f'*{project}:'    if project else '*:'
-                redis_episode_name += f'*{episode}:*'   if episode else '*:*'
+                redis_episode_name = 'sg:episode:'
+                redis_episode_name += f'*{project}:' if project else '*:'
+                redis_episode_name += f'*{episode}:*' if episode else '*:*'
                 redis_episode_names = redis_ctl.keys(redis_episode_name.lower())
 
                 if len(redis_episode_names) > 0:
@@ -389,21 +386,21 @@ def sg_entity_update(body):
                     #       GET SEQUENCE        #
                     # ------------------------- #
                     redis_sequence_name = 'sg:sequence:'
-                    redis_sequence_name += f'*{project}:'       if project  else '*:'
-                    redis_sequence_name += f'*{episode}:'       if episode  else '*:'
-                    redis_sequence_name += f'*_{sequence}:*'    if sequence else '*:*'
+                    redis_sequence_name += f'*{project}:' if project else '*:'
+                    redis_sequence_name += f'*{episode}:' if episode else '*:'
+                    redis_sequence_name += f'*_{sequence}:*' if sequence else '*:*'
                     redis_sequence_names = redis_ctl.keys(redis_sequence_name.lower())
 
                     if len(redis_sequence_names) > 0:
                         # --------------------- #
                         #       GET SHOT        #
                         # --------------------- #
-                        redis_shot_name =  'sg:shot:'
-                        redis_shot_name += f'*{project}:'   if project  else '*:'
-                        redis_shot_name += f'*{episode}:'   if episode  else '*:'
+                        redis_shot_name = 'sg:shot:'
+                        redis_shot_name += f'*{project}:' if project else '*:'
+                        redis_shot_name += f'*{episode}:' if episode else '*:'
                         redis_shot_name += f'*_{sequence}:' if sequence else '*:'
-                        redis_shot_name += f'*_{shot}:'     if shot     else '*:'
-                        redis_shot_name += f'{shot_id}'     if shot_id  else '*'
+                        redis_shot_name += f'*_{shot}:' if shot else '*:'
+                        redis_shot_name += f'{shot_id}' if shot_id else '*'
                         redis_shot_names = redis_ctl.keys(redis_shot_name.lower())
 
                         if len(redis_shot_names) > 0:
@@ -421,9 +418,9 @@ def sg_entity_update(body):
                                 
                                 request_data = {
                                     'request_type': 'update',
-                                    'entity_type':  'Shot',
-                                    'entity_id':    entity_id,
-                                    'data':         sg_data,
+                                    'entity_type': 'Shot',
+                                    'entity_id': entity_id,
+                                    'data': sg_data,
                                 }
 
                                 # ////// MULTI ENTITY UPDATE MODE ////// #
@@ -472,10 +469,10 @@ def create_directory(projects, data):
 
     for shot_dict in data:
         if shot_dict.get('directory') == True:
-            project     = shot_dict.get('project')
-            episode     = shot_dict.get('episode')
-            sequence    = shot_dict.get('sequence')
-            shot        = shot_dict.get('shot')
+            project = shot_dict.get('project')
+            episode = shot_dict.get('episode')
+            sequence = shot_dict.get('sequence')
+            shot = shot_dict.get('shot')
             
             project_path = projects[project]['path']
 
