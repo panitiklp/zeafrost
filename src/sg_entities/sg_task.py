@@ -351,7 +351,7 @@ def sg_entity_search_basic(body):
             res_data['entity_name'] = resdis_name_split[4]
             res_data['step'] = resdis_name_split[5]
             res_data['task'] = resdis_name_split[6]
-            res_data['task_id'] = int(resdis_name_split[7]) if resdis_name_split[7] else None
+            res_data['id'] = int(resdis_name_split[7]) if resdis_name_split[7] else None
             result.append(res_data)
         
     
