@@ -85,6 +85,25 @@ def task_search_by_user(body={}):
     
     return result
 
+def task_search_basic(body={}):
+    result = OrderedDict()
+    result['code'] = None
+    result['message'] = ''
+    result['data'] = []
+
+    task_result = sg_task.sg_entity_search_basic(body)
+
+    if task_result:
+        result['code'] = 200
+        result['message'] = 'OK'
+        result['data'] = task_result
+    
+    else:
+        result['code'] = 5000
+        result['message'] = 'SHOTGRID_ERROR: [TASK], An Error Occurred In The ShotGrid.'
+    
+    return result
+
 def create(entity, body={}):
     sg_entity = entity_module_maps.get(entity.lower())
 

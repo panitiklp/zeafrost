@@ -43,6 +43,25 @@ def task_search_by_user(body):
     
     return result
 
+def task_search_basic(body):
+    result = OrderedDict()
+    result['code'] = None
+    result['message'] = ''
+    result['data'] = []
+
+    task_result = sg_ctl.task_search_basic(body)
+
+    if task_result:
+        result['code'] = task_result.get('code')
+        result['message'] = task_result.get('message')
+        result['data'] = task_result.get('data') or []
+    
+    else:
+        result['code'] = 3000
+        result['message'] = 'API_ERROR: [TASK], An Error Occurred In The API.'
+    
+    return result
+
 def create(entity, body):
     result = OrderedDict()
     result['code'] = None

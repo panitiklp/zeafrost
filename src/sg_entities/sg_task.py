@@ -1,8 +1,7 @@
 from collections import OrderedDict
 from . import sg_asset, sg_shot, sg_entity_utils
 from ..sg_controllers import sg_con
-from ..redis_controllers import redis_ctl
-
+from ..redis_controllers import redis_ctl, redis_utils
 from pprint import pprint
 
 SG_FIELD_MAPS = {
@@ -56,11 +55,65 @@ NESTED_ENTITY_FOR_REDIS_FIELDS = {
     }
 }
 
+# ========================= #
+#       ENTITY CACHE        #
+# ========================= #
+def entity_cache(*args, **kwargs):
+    project = ''
+    redis_pattern = ''
+    sg_result = []
+    if kwargs.get('project') == None:
+        return []
+
+    for arg in [each for each in args if isinstance(each, dict)]:
+        for key, val in arg.items():
+            if key == 'project':
+                project = val.lower()
+                break
+    if kwargs:
+        project = kwargs.get('project')
+
+    if project:
+        sg = sg_con.connect()
+        sg_result = sg.find(
+            'Task', 
+            filters = [['project', 'name_contains', project]],
+            fields  = list(['content', 'step.Step.short_name', 'entity.Asset.code', 'entity.Shot.code']),
+            order   = [{'field_name': 'code', 'direction':'asc'}]
+        )
+        redis_pattern = f'sg:task:*{project}:*'.lower()
+        redis_ctl.delete(redis_pattern)
+
+    for elem in sg_result:
+        redis_data = {}
+
+        redis_name =  'sg:task:'
+        redis_name += f'{project}:'
+        
+        if elem['entity.Asset.code']:
+            redis_name += f'asset:{elem["entity.Asset.code"]}:'
+        elif elem['entity.Shot.code']:
+            redis_name += f'shot:{elem["entity.Shot.code"]}:'
+
+        redis_name += f'{elem["step.Step.short_name"]}:'
+        redis_name += f'{elem["content"]}:'
+        redis_name += f'{elem.get("id")}'
+
+        redis_data['project'] = project or ''
+        redis_data['id'] = elem['id'] or ''
+        redis_data['name'] = elem['content'] or ''
+        redis_data['asset'] = elem['entity.Asset.code'] or ''
+        redis_data['shot'] = elem['entity.Shot.code'] or ''
+        redis_data['step'] = elem['step.Step.short_name'] or ''
+        
+        redis_ctl.hset(redis_name.lower(), redis_data)
+
+    return True
+
 # ================================== #
 #       SHOTGRID ENTITY SEARCH       #
 # ================================== #
 def sg_entity_search(body):
-    
     shotgrid = body.get('shotgrid') or False
     project = body.get('project')
     episode = body.get('episode')
@@ -272,7 +325,38 @@ def sg_entity_search(body):
                 
                 parsed_result.append(parsed_data)
             return parsed_result
+
+# ================================== #
+#       SHOTGRID ENTITY SEARCH       #
+# ================================== #
+def sg_entity_search_basic(body):
+    project = body.get('project')
+    task_id = body.get('id')
+    entity = body.get('entity')
     
+    result = []
+
+    redis_name =  'sg:task:'
+    redis_name += f'*{project}:' if project else '*:'
+    redis_name += str(entity) if entity else '*'
+    redis_name += str(task_id) if task_id else '*'
+
+    redis_names = redis_ctl.keys(redis_name.lower())
+    if redis_names:
+        for redis_name in sorted(redis_names):
+            res_data = {}
+            resdis_name_split = redis_name.split(':')
+            res_data['project'] = resdis_name_split[2].upper()
+            res_data['entity_type'] = resdis_name_split[3]
+            res_data['entity_name'] = resdis_name_split[4]
+            res_data['step'] = resdis_name_split[5]
+            res_data['task'] = resdis_name_split[6]
+            res_data['task_id'] = int(resdis_name_split[7]) if resdis_name_split[7] else None
+            result.append(res_data)
+        
+    
+    return result
+
 # ================================== #
 #       SHOTGRID ENTITY CREATE       #
 # ================================== #

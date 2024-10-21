@@ -145,6 +145,44 @@ def task_search_by_user():
 
     return res
 
+# ------------------------------ #
+#       SEARCH - TASK BASIC      #
+# ------------------------------ #
+@app.route(f'/{BASE_ROUTE}/task/search-basic', methods=ALLOWED_METHODS)
+def task_search_basic():
+    result = []
+    body = {}
+
+    if request.method == 'GET':
+        body = request.args
+    
+    elif request.method == 'POST':
+        body = request.json
+    
+    elif request.method == 'OPTIONS':
+        res = api_response(
+            code=200, 
+            message='', 
+            timestamp=gen_utils.get_timestamp(API_TIMEZONE)
+        )
+        return res
+    
+    if request.method in ['GET', 'POST']:
+        result = main_ctl.task_search_basic(body=body)
+
+    res = api_response(
+        code=result.get('code'), 
+        message=result.get('message'), 
+        entity='task', 
+        payload=body, 
+        data=result.get('data'), 
+        timestamp=gen_utils.get_timestamp(API_TIMEZONE)
+    )
+
+    gc.collect()        # clean unreference memory
+
+    return res
+
 # ----------------- #
 #       CREATE      #
 # ----------------- #
