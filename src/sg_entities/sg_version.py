@@ -425,8 +425,8 @@ def sg_entity_create(body):
                 'description': description
             }
 
-            if version_code: 
-                sg_data['sg_version_code_number'] = str(version_code)
+            # if version_code: 
+            #     sg_data['sg_version_code_number'] = str(version_code)
 
             if playlist_id: 
                 sg_data['playlists'] = [{'type': 'Playlist', 'id': playlist_id}]
@@ -461,8 +461,8 @@ def sg_entity_create(body):
             if work_file:
                 sg_data['sg_worked_file_name'] = work_file
             
-            if version_type:
-                sg_data['sg_version_type'] = version_type.title()
+            # if version_type:
+            #     sg_data['sg_version_type'] = version_type.title()
             
             if path_to_movie: 
                 upload_file_path = path_to_movie
@@ -520,18 +520,18 @@ def sg_entity_create(body):
                     data=sg_note_data
                 )
 
-            # ----------------------------------------- #
-            #       ADD ENTITY INFO INTO VERSION        #
-            # ----------------------------------------- #
-            # ----- SHOT ----- #
-            if entity_type == 'Shot' and entity_data:
-                sg_data['sg_episode_version'] = {'type': 'Episode', 'id': int(ast.literal_eval(entity_data['sg_episode.episode.id']))}
-                sg_data['sg_sequence'] = {'type': 'Sequence', 'id': int(ast.literal_eval(entity_data['sg_sequence.sequence.id']))}
-                sg_data['sg_shot'] = {'type': 'Shot', 'id': int(entity_data.get('id'))}
+            # # ----------------------------------------- #
+            # #       ADD ENTITY INFO INTO VERSION        #
+            # # ----------------------------------------- #
+            # # ----- SHOT ----- #
+            # if entity_type == 'Shot' and entity_data:
+            #     sg_data['sg_episode_version'] = {'type': 'Episode', 'id': int(ast.literal_eval(entity_data['sg_episode.episode.id']))}
+            #     sg_data['sg_sequence'] = {'type': 'Sequence', 'id': int(ast.literal_eval(entity_data['sg_sequence.sequence.id']))}
+            #     sg_data['sg_shot'] = {'type': 'Shot', 'id': int(entity_data.get('id'))}
 
-            # ----- ASSET ----- #
-            elif entity_type == 'Asset' and entity_data:
-                sg_data['sg_asset'] = {'type': 'Asset', 'id': int(entity_data.get('id'))}
+            # # ----- ASSET ----- #
+            # elif entity_type == 'Asset' and entity_data:
+            #     sg_data['sg_asset'] = {'type': 'Asset', 'id': int(entity_data.get('id'))}
 
             # ----------------------------- #
             #       PUBLISHED FILE IDS      #
@@ -548,10 +548,6 @@ def sg_entity_create(body):
             #       CREAT VERSION, AND UPDATE NOTE INTO VERSION        #
             # -------------------------------------------------------- #
             if entity_data:
-                # print('-'*20)
-                # pprint(sg_data)
-                # print('-'*20)
-
                 result = sg.create(
                     entity_type = 'Version',
                     data = sg_data
@@ -565,19 +561,19 @@ def sg_entity_create(body):
                         data={'sg_status_list': task_status}
                     )
 
-                # ----------------------------- #
-                #       UPLOAD MOVIE FILE       #
-                # ----------------------------- #
-                if upload_file_path and result and not '%04d' in upload_file_path:
-                    thread_upload = threading.Thread(
-                        target=upload_file, 
-                        args=(
-                            sg, 
-                            result.get('id'), 
-                            upload_file_path,
-                        )
-                    )
-                    thread_upload.start()
+                # # ----------------------------- #
+                # #       UPLOAD MOVIE FILE       #
+                # # ----------------------------- #
+                # if upload_file_path and result and not '%04d' in upload_file_path:
+                #     thread_upload = threading.Thread(
+                #         target=upload_file, 
+                #         args=(
+                #             sg, 
+                #             result.get('id'), 
+                #             upload_file_path,
+                #         )
+                #     )
+                #     thread_upload.start()
                 
                 # --------------------- #
                 #       TIME LOGGED     #
