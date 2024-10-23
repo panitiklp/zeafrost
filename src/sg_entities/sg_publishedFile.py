@@ -57,6 +57,7 @@ def sg_entity_search(body):
     entity_id = body.get('id')
     entity_ids = body.get('ids')
     entity = body.get('entity')
+    entity_linked_id = body.get('entity_id')
     project = body.get('project')
     step = body.get('step')
     steps = body.get('steps')
@@ -90,6 +91,24 @@ def sg_entity_search(body):
         result = sg.find(
             'PublishedFile', 
             filters=_filters, 
+            fields=list(SG_FIELD_MAPS.values())
+        )
+        if shotgrid:
+            return result
+        else:
+            return sg_entity_utils.entity_response_adapter(
+                data = result, 
+                sg_fields = SG_FIELD_MAPS_INVERT, 
+                str_fields = ['code'],
+                nested_entity_fields = NESTED_ENTITY_FOR_REDIS_FIELDS
+        )
+    elif entity_linked_id:
+        sg = sg_con.connect()
+        result = sg.find(
+            'PublishedFile', 
+            filters=[
+                ['entity', 'is', {'type': 'Asset', 'id':int(entity_linked_id)}]
+            ], 
             fields=list(SG_FIELD_MAPS.values())
         )
         if shotgrid:
