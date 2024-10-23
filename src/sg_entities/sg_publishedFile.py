@@ -25,10 +25,11 @@ SG_FIELD_MAPS = {
     'version_code': 'sg_version_code',
     'work_file': 'sg_worked_file_name',
     'publish_type': 'published_file_type',
+    'entity_type': 'sg_entity_type',
     'is_sound_sequence': 'sg_is_sound_sequence',
     'file_path': 'sg_file_path',
     'description': 'description',
-    'asset_type': 'sg_asset_type',
+    # 'asset_type': 'sg_asset_type',
     'user': 'sg_user',
     'created_at': 'created_at'
 }
@@ -475,7 +476,7 @@ def sg_entity_create(body):
                     data_dict['data']['created_by'] = {'type': 'HumanUser', 'id': user_id} # USER ID
                 
                 if entity_type: 
-                    data_dict['data']['sg_published_class'] = entity_type # ENTITY TYPE
+                    data_dict['data']['sg_entity_type'] = entity_type # ENTITY TYPE
                 
                 if work_file: 
                     data_dict['data']['sg_worked_file_name'] = work_file # WORK FILE
@@ -495,15 +496,15 @@ def sg_entity_create(body):
                 if namespace: 
                     data_dict['data']['sg_namespace'] = namespace # NAMESPACE
                 
-                if asset_type: 
-                    data_dict['data']['sg_asset_type'] = asset_type # ASSET TYPE
+                # if asset_type: 
+                #     data_dict['data']['sg_asset_type'] = asset_type # ASSET TYPE
 
-                # /////// ADD ASSET /////// #
-                if entity_type.lower() == 'asset': 
-                    data_dict['data']['sg_asset_link'] = {'type': 'Asset', 'id': entity_id}
+                # # /////// ADD ASSET /////// #
+                # if entity_type.lower() == 'asset': 
+                #     data_dict['data']['sg_asset_link'] = {'type': 'Asset', 'id': entity_id}
 
-                elif entity_type.lower() == 'shot' and asset_id: 
-                    data_dict['data']['sg_asset_link'] = {'type': 'Asset', 'id': asset_id}
+                # elif entity_type.lower() == 'shot' and asset_id: 
+                #     data_dict['data']['sg_asset_link'] = {'type': 'Asset', 'id': asset_id}
 
                 if version_number: 
                     data_dict['data']['version_number'] = int(version_number)
@@ -518,7 +519,6 @@ def sg_entity_create(body):
                         data_dict['data']['version_number'] = int(version_number_regex_result[0])                    
                 
                 sg_data.append(data_dict)
-        
         if len(sg_data) > 0:
             result = sg.batch(sg_data)
 
