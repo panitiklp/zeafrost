@@ -459,7 +459,7 @@ def sg_entity_create(body):
                 #       PUBLISH FILE TYPE        #
                 # ------------------------------ #
                 if publish_file_type:
-                    redis_publishedfiletype_names = redis_ctl.keys(f'sg:publishedfiletype:{publish_file_type}:*')                    
+                    redis_publishedfiletype_names = redis_ctl.keys(f'sg:publishedfiletype:{publish_file_type.lower()}:*')  
                     if len(redis_publishedfiletype_names) > 0:
                         data_dict['data']['published_file_type'] = {
                             'type': 'PublishedFileType', 
