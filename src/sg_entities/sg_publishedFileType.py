@@ -6,6 +6,8 @@ SG_FIELD_MAPS = {
     'code': 'code',
     'short_name': 'short_name',
     'description': 'description',
+    'softwares': 'sg_softwares',
+    'steps': 'sg_steps',
     'status': 'sg_status_list'
 }
 
